@@ -28,6 +28,7 @@ import scala.collection.{Seq => CSeq, Map => CMap, Set => CSet, Iterable => CIte
   * - 'M' Map[_, _]
   * - 'O' Option[_]
   * - 'P' Product
+  * - '#' Product with type identifier
   * - 'S' String
   * - 'T' Set[_]
   * - 'X' Seq[_]
@@ -51,6 +52,11 @@ class RefMapOut(out0: DataOutput) {
 
   protected def isDefaultPackage(pck: String): Boolean = false
 
+  /** Override this to return a value different than `-1` to benefit
+    *  from more efficient product serialization.
+    */
+  protected def productTypeId(name: String): Int = -1
+
   def writeProduct(p: Product): Unit = {
     val id0Ref = ref.get(p)
     if (id0Ref != null) {
@@ -58,7 +64,7 @@ class RefMapOut(out0: DataOutput) {
       out.writeInt(id0Ref)
       return
     }
-    out.writeByte('P')
+
     // `getPackage` not supported by Scala.js:
     // val pck     = p.getClass.getPackage.getName
     // Java 9+:
@@ -70,7 +76,14 @@ class RefMapOut(out0: DataOutput) {
     }
     val prefix  = p.productPrefix
     val name    = if (isDefaultPackage(pck)) prefix else s"$pck.$prefix"
-    out.writeUTF(name)
+    val typeId  = productTypeId(name)
+    if (typeId == -1) {
+      out.writeByte('P')
+      out.writeUTF(name)
+    } else {
+      out.writeByte('#')
+      out.writeInt(typeId)
+    }
     out.writeShort(p.productArity)
     writeIdentifiedProduct(p)
 

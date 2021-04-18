@@ -30,6 +30,7 @@ import scala.collection.mutable
   * - 'M' Map[_, _]
   * - 'O' Option[_]
   * - 'P' Product (through registered `ProductReader` instances)
+  * - '#' Product with type identifier
   * - 'S' String
   * - 'T' Set[_]
   * - 'X' Vec[_] (IndexedSeq)
@@ -59,6 +60,9 @@ abstract class RefMapIn[Repr](in0: DataInput) {
 
   protected def readProductWithKey(key: String, arity: Int): Product
 
+  protected def readProductWithId(typeId: Int): Product =
+    throw new NotImplementedError()
+
   // ---- impl ----
 
   private[this] val map   = mutable.Map.empty[Int, Product]
@@ -77,7 +81,7 @@ abstract class RefMapIn[Repr](in0: DataInput) {
       case 'X' => readIdentifiedVec(readElem())
       case 'M' => readIdentifiedMap(readElem(), readElem())
       case 'T' => readIdentifiedSet(readElem())
-      case 'P' | '<' | 'C' => readProductWithCookie(cookie)
+      case '#' | 'P' | '<' | 'C' => readProductWithCookie(cookie)
       case 'R' => readIdentifiedR()
       case 'I' => in.readInt()
       case 'L' => in.readLong()
@@ -114,6 +118,14 @@ abstract class RefMapIn[Repr](in0: DataInput) {
   protected def readProductWithCookie(cookie: Char): Product =
     (cookie: @switch) match {
       case 'C' => readIdentifiedConst()
+
+      case '#' =>
+        val typeId  = in0.readInt()
+        val res     = readProductWithId(typeId)
+        val id      = count
+        map    += ((id, res))
+        count   = id + 1
+        res
 
       case 'P' =>
         val prefix0 = in0.readUTF()

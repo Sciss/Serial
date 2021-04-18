@@ -63,6 +63,14 @@ assert(p == q)
 There are serializers included for the standard primitive types and common extensions such
 as `Option`, `Either`, `Tuple2`, `List` etc.
 
+## RefMapIn, RefMapOut
+
+These are helper classes that can be used to implement serialization for open-ended type hierarchies,
+typically involving `Product` types (such as case classes). They use an initial `Char` element to distinguish
+between multiple types, such as primitives, composites (options, sequences), and products. Traditionally,
+products are serialized using their "name", derived from `productPrefix` and a default package, but they can
+also be implemented using an `Int` typeId registry.
+
 ## Transactional provision
 
 The library is mainly used in conjunction with the [Lucre](https://github.com/Sciss/Lucre) framework, where 

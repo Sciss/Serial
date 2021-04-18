@@ -1,17 +1,17 @@
 lazy val baseName       = "Serial"
 lazy val baseNameL      = baseName.toLowerCase
 
-lazy val projectVersion = "2.0.1"
+lazy val projectVersion = "2.0.2-SNAPSHOT"
 lazy val mimaVersion    = "2.0.0"
 
 lazy val deps = new {
   val test = new {
-    val scalaTest = "3.2.3"
+    val scalaTest = "3.2.7"
   }
 }
 
 lazy val commonJvmSettings = Seq(
-  crossScalaVersions := Seq("3.0.0-RC1", "2.13.4", "2.12.13"),
+  crossScalaVersions := Seq("3.0.0-RC2", "2.13.5", "2.12.13"),
 )
 
 // sonatype plugin requires that these are in global
@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
   description        := "Simple binary serialization library for Scala",
   homepage           := Some(url(s"https://git.iem.at/sciss/${name.value}")),
   licenses           := Seq("LGPL v2.1+" -> url( "http://www.gnu.org/licenses/lgpl-2.1.txt")),
-  scalaVersion       := "2.13.4",
+  scalaVersion       := "2.13.5",
   mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
   libraryDependencies ++= {
     if (isDotty.value) Nil else Seq(
